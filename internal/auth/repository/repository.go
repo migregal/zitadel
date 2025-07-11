@@ -12,4 +12,5 @@ type Repository interface {
 	UserSessionRepository
 	OrgRepository
 	RefreshTokenRepository
+	PushedAuthRequestRepository
 }

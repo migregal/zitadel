@@ -14,13 +14,15 @@ import (
 	"github.com/zitadel/zitadel/internal/domain"
 	eventstore2 "github.com/zitadel/zitadel/internal/eventstore"
 	"github.com/zitadel/zitadel/internal/id"
+	parCache "github.com/zitadel/zitadel/internal/pushed_auth_request/repository/cache"
 	"github.com/zitadel/zitadel/internal/query"
 )
 
 type Config struct {
-	SearchLimit                uint64
-	Spooler                    auth_handler.Config
-	AmountOfCachedAuthRequests uint16
+	SearchLimit                      uint64
+	Spooler                          auth_handler.Config
+	AmountOfCachedAuthRequests       uint16
+	AmountOfCachedPushedAuthRequests uint16
 }
 
 type EsRepository struct {
@@ -30,6 +32,7 @@ type EsRepository struct {
 	eventstore.RefreshTokenRepo
 	eventstore.UserSessionRepo
 	eventstore.OrgRepository
+	eventstore.PushedAuthRequestRepo
 }
 
 func Start(ctx context.Context, conf Config, systemDefaults sd.SystemDefaults, command *command.Commands, queries *query.Queries, dbClient *database.DB, esV2 *eventstore2.Eventstore, oidcEncryption crypto.EncryptionAlgorithm, userEncryption crypto.EncryptionAlgorithm) (*EsRepository, error) {
@@ -42,6 +45,8 @@ func Start(ctx context.Context, conf Config, systemDefaults sd.SystemDefaults, c
 	auth_handler.Start(ctx)
 
 	authReq := cache.Start(dbClient, conf.AmountOfCachedAuthRequests)
+
+	pushedAuthReq := parCache.Start(dbClient, conf.AmountOfCachedPushedAuthRequests)
 
 	userRepo := eventstore.UserRepo{
 		SearchLimit:    conf.SearchLimit,
@@ -103,6 +108,9 @@ func Start(ctx context.Context, conf Config, systemDefaults sd.SystemDefaults, c
 			Eventstore:     esV2,
 			Query:          queries,
 		},
+		eventstore.PushedAuthRequestRepo{
+			PushedAuthRequests: pushedAuthReq,
+		},
 	}, nil
 }
 
@@ -135,5 +143,14 @@ func (repo *EsRepository) Health(ctx context.Context) error {
 	if err := repo.UserRepo.Health(ctx); err != nil {
 		return err
 	}
-	return repo.AuthRequestRepo.Health(ctx)
+
+	if err := repo.AuthRequestRepo.Health(ctx); err != nil {
+		return err
+	}
+
+	if err := repo.PushedAuthRequestRepo.Health(ctx); err != nil {
+		return err
+	}
+
+	return nil
 }

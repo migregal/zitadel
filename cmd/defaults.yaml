@@ -466,6 +466,9 @@ Auth:
   # There are two caches implemented one for id and one for code
   AmountOfCachedAuthRequests: 0 #ZITADEL_AUTH_AMOUNTOFCACHEDAUTHREQUESTS
 
+  # Defines the amount of pushed auth requests (RFC-9126) stored in the LRU caches.
+  AmountOfCachedPushedAuthRequests: 0 #ZITADEL_AUTH_AMOUNTOFCACHEDPUSHEDAUTHREQUESTS
+
 Admin:
   # See Projections.BulkLimit
   SearchLimit: 1000 # ZITADEL_ADMIN_SEARCHLIMIT
