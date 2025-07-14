@@ -60,15 +60,16 @@ func (c *PushedAuthRequestCache) GetPushedAuthRequestByRequestURI(ctx context.Co
 	return request, nil
 }
 
-func (c *PushedAuthRequestCache) SavePushedAuthRequest(ctx context.Context, requestURI string, request *oidc.AuthRequest) error {
+func (c *PushedAuthRequestCache) SavePushedAuthRequest(
+	ctx context.Context, requestURI string, request *oidc.AuthRequest, expiresAt time.Time) error {
 	b, err := json.Marshal(request)
 	if err != nil {
 		return zerrors.ThrowInternal(err, "CACHE-TfX8Eq", "Errors.Internal")
 	}
 
 	_, err = c.client.Exec(
-		"INSERT INTO auth.pushed_auth_requests (request_uri, request, instance_id, creation_date) VALUES($1, $2, $3, $4)",
-		requestURI, b, authz.GetInstance(ctx).InstanceID(), time.Now())
+		"INSERT INTO auth.pushed_auth_requests (request_uri, request, instance_id, expires_at) VALUES($1, $2, $3, $4)",
+		requestURI, b, authz.GetInstance(ctx).InstanceID(), expiresAt)
 	if err != nil {
 		return zerrors.ThrowInternal(err, "CACHE-B4ZGaB", "Errors.Internal")
 	}

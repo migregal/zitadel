@@ -22,11 +22,13 @@ func (repo *PushedAuthRequestRepo) Health(ctx context.Context) error {
 	return repo.PushedAuthRequests.Health(ctx)
 }
 
-func (repo *PushedAuthRequestRepo) CreatePushedAuthRequest(ctx context.Context, requestURI string, request *oidc.AuthRequest, expiresAt time.Time) (err error) {
+func (repo *PushedAuthRequestRepo) CreatePushedAuthRequest(
+	ctx context.Context, requestURI string, request *oidc.AuthRequest, expiresAt time.Time,
+) (err error) {
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
 
-	return repo.PushedAuthRequests.SavePushedAuthRequest(ctx, requestURI, request)
+	return repo.PushedAuthRequests.SavePushedAuthRequest(ctx, requestURI, request, expiresAt)
 }
 
 func (repo *PushedAuthRequestRepo) GetPushedAuthRequest(ctx context.Context, requestURI string) (_ *oidc.AuthRequest, err error) {
