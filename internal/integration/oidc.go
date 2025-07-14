@@ -216,7 +216,7 @@ func (i *Instance) createOIDCAuthRequestWithDomain(ctx context.Context, domain, 
 		return now, "", fmt.Errorf("create relying party: %w", err)
 	}
 	codeChallenge := oidc.NewSHACodeChallenge(CodeVerifier)
-	authURL := rp.AuthURL("state", provider, rp.WithCodeChallenge(codeChallenge))
+	authURL := rp.AuthURL("state", provider, rp.WithCodeChallenge(codeChallenge)).String()
 
 	var headers map[string]string
 	if loginClient != "" {
@@ -256,7 +256,7 @@ func (i *Instance) createOIDCAuthRequestImplicit(ctx context.Context, clientID, 
 		return "", err
 	}
 
-	authURL := rp.AuthURL("state", provider)
+	authURL := rp.AuthURL("state", provider).String()
 
 	// implicit is not natively supported so let's just overwrite the response type
 	parsed, _ := url.Parse(authURL)

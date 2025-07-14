@@ -38,6 +38,7 @@ type Config struct {
 	JWKSCacheControlMaxAge            time.Duration
 	CustomEndpoints                   *EndpointConfig
 	DeviceAuth                        *DeviceAuthorizationConfig
+	PushedAuthorizationRequest        *PARConfig
 	DefaultLoginURLV2                 string
 	DefaultLogoutURLV2                string
 	PublicKeyCacheMaxAge              time.Duration
@@ -53,6 +54,7 @@ type EndpointConfig struct {
 	EndSession    *Endpoint
 	Keys          *Endpoint
 	DeviceAuth    *Endpoint
+	PAR           *Endpoint
 }
 
 type Endpoint struct {
@@ -210,13 +212,14 @@ func publicAuthPathPrefixes(endpoints *EndpointConfig) []string {
 
 func createOPConfig(config Config, defaultLogoutRedirectURI string, cryptoKey []byte) (*op.Config, error) {
 	opConfig := &op.Config{
-		DefaultLogoutRedirectURI: defaultLogoutRedirectURI,
-		CodeMethodS256:           config.CodeMethodS256,
-		AuthMethodPost:           config.AuthMethodPost,
-		AuthMethodPrivateKeyJWT:  config.AuthMethodPrivateKeyJWT,
-		GrantTypeRefreshToken:    config.GrantTypeRefreshToken,
-		RequestObjectSupported:   config.RequestObjectSupported,
-		DeviceAuthorization:      config.DeviceAuth.toOPConfig(),
+		DefaultLogoutRedirectURI:   defaultLogoutRedirectURI,
+		CodeMethodS256:             config.CodeMethodS256,
+		AuthMethodPost:             config.AuthMethodPost,
+		AuthMethodPrivateKeyJWT:    config.AuthMethodPrivateKeyJWT,
+		GrantTypeRefreshToken:      config.GrantTypeRefreshToken,
+		RequestObjectSupported:     config.RequestObjectSupported,
+		DeviceAuthorization:        config.DeviceAuth.toOPConfig(),
+		PushedAuthorizationRequest: config.PushedAuthorizationRequest.toOPConfig(),
 	}
 	if cryptoLength := len(cryptoKey); cryptoLength != 32 {
 		return nil, zerrors.ThrowInternalf(nil, "OIDC-D43gf", "crypto key must be 32 bytes, but is %d", cryptoLength)

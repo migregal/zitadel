@@ -522,6 +522,8 @@ OIDC:
       Path: /oauth/v2/keys # ZITADEL_OIDC_CUSTOMENDPOINTS_KEYS_PATH
     DeviceAuth:
       Path: /oauth/v2/device_authorization # ZITADEL_OIDC_CUSTOMENDPOINTS_DEVICEAUTH_PATH
+    PAR:
+      Path: /oauth/v2/ext/par # ZITADEL_OIDC_CUSTOMENDPOINTS_PAR_PATH
   DeviceAuth:
     Lifetime: 5m # ZITADEL_OIDC_DEVICEAUTH_LIFETIME
     PollInterval: 5s # ZITADEL_OIDC_DEVICEAUTH_POLLINTERVAL

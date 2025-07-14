@@ -56,6 +56,9 @@ func endpoints(endpointConfig *EndpointConfig) op.Endpoints {
 		EndSession:          op.NewEndpoint("/oidc/v1/end_session"),
 		JwksURI:             op.NewEndpoint("/oauth/v2/keys"),
 		DeviceAuthorization: op.NewEndpoint("/oauth/v2/device_authorization"),
+		PushedAuthorizationRequest: op.NewEndpoint(
+			"/oauth/v2/ext/par", op.EndpointWithMethod(http.MethodPost),
+		),
 	}
 
 	if endpointConfig == nil {
@@ -84,6 +87,11 @@ func endpoints(endpointConfig *EndpointConfig) op.Endpoints {
 	}
 	if endpointConfig.DeviceAuth != nil {
 		endpoints.DeviceAuthorization = op.NewEndpointWithURL(endpointConfig.DeviceAuth.Path, endpointConfig.DeviceAuth.URL)
+	}
+	if endpointConfig.PAR != nil {
+		endpoints.PushedAuthorizationRequest = op.NewEndpoint(
+			endpointConfig.PAR.Path, op.EndpointWithMethod(http.MethodPost), op.EndpointWithURL(endpointConfig.PAR.URL),
+		)
 	}
 	return endpoints
 }
@@ -151,6 +159,13 @@ func (s *Server) DeviceAuthorization(ctx context.Context, r *op.ClientRequest[oi
 	return s.LegacyServer.DeviceAuthorization(ctx, r)
 }
 
+func (s *Server) PAR(ctx context.Context, r *op.Request[oidc.PARRequest]) (_ *op.Response, err error) {
+	ctx, span := tracing.NewSpan(ctx)
+	defer func() { span.EndWithError(err) }()
+
+	return s.LegacyServer.PushedAuthorizationRequest(ctx, r)
+}
+
 func (s *Server) Revocation(ctx context.Context, r *op.ClientRequest[oidc.RevocationRequest]) (_ *op.Response, err error) {
 	ctx, span := tracing.NewSpan(ctx)
 	defer func() { span.EndWithError(err) }()
@@ -170,17 +185,18 @@ func (s *Server) createDiscoveryConfig(ctx context.Context, supportedUILocales o
 	backChannelLogoutSupported := authz.GetInstance(ctx).Features().EnableBackChannelLogout
 
 	return &oidc.DiscoveryConfiguration{
-		Issuer:                      issuer,
-		AuthorizationEndpoint:       s.Endpoints().Authorization.Absolute(issuer),
-		TokenEndpoint:               s.Endpoints().Token.Absolute(issuer),
-		IntrospectionEndpoint:       s.Endpoints().Introspection.Absolute(issuer),
-		UserinfoEndpoint:            s.Endpoints().Userinfo.Absolute(issuer),
-		RevocationEndpoint:          s.Endpoints().Revocation.Absolute(issuer),
-		EndSessionEndpoint:          s.Endpoints().EndSession.Absolute(issuer),
-		JwksURI:                     s.Endpoints().JwksURI.Absolute(issuer),
-		DeviceAuthorizationEndpoint: s.Endpoints().DeviceAuthorization.Absolute(issuer),
-		ScopesSupported:             op.Scopes(s.Provider()),
-		ResponseTypesSupported:      op.ResponseTypes(s.Provider()),
+		Issuer:                             issuer,
+		AuthorizationEndpoint:              s.Endpoints().Authorization.Absolute(issuer),
+		TokenEndpoint:                      s.Endpoints().Token.Absolute(issuer),
+		IntrospectionEndpoint:              s.Endpoints().Introspection.Absolute(issuer),
+		UserinfoEndpoint:                   s.Endpoints().Userinfo.Absolute(issuer),
+		RevocationEndpoint:                 s.Endpoints().Revocation.Absolute(issuer),
+		EndSessionEndpoint:                 s.Endpoints().EndSession.Absolute(issuer),
+		JwksURI:                            s.Endpoints().JwksURI.Absolute(issuer),
+		DeviceAuthorizationEndpoint:        s.Endpoints().DeviceAuthorization.Absolute(issuer),
+		PushedAuthorizationRequestEndpoint: s.Endpoints().PushedAuthorizationRequest.Absolute(issuer),
+		ScopesSupported:                    op.Scopes(s.Provider()),
+		ResponseTypesSupported:             op.ResponseTypes(s.Provider()),
 		ResponseModesSupported: []string{
 			string(oidc.ResponseModeQuery),
 			string(oidc.ResponseModeFragment),

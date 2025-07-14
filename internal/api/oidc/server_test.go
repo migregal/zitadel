@@ -2,6 +2,7 @@ package oidc
 
 import (
 	"context"
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,14 +45,15 @@ func TestServer_createDiscoveryConfig(t *testing.T) {
 						return provider
 					}(),
 					op.Endpoints{
-						Authorization:       op.NewEndpoint("auth"),
-						Token:               op.NewEndpoint("token"),
-						Introspection:       op.NewEndpoint("introspect"),
-						Userinfo:            op.NewEndpoint("userinfo"),
-						Revocation:          op.NewEndpoint("revoke"),
-						EndSession:          op.NewEndpoint("logout"),
-						JwksURI:             op.NewEndpoint("keys"),
-						DeviceAuthorization: op.NewEndpoint("device"),
+						Authorization:              op.NewEndpoint("auth"),
+						Token:                      op.NewEndpoint("token"),
+						Introspection:              op.NewEndpoint("introspect"),
+						Userinfo:                   op.NewEndpoint("userinfo"),
+						Revocation:                 op.NewEndpoint("revoke"),
+						EndSession:                 op.NewEndpoint("logout"),
+						JwksURI:                    op.NewEndpoint("keys"),
+						DeviceAuthorization:        op.NewEndpoint("device"),
+						PushedAuthorizationRequest: op.NewEndpoint("ext/par", op.EndpointWithMethod(http.MethodPost)),
 					},
 				),
 				signingKeyAlgorithm: "RS256",

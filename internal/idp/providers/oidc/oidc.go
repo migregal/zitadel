@@ -159,7 +159,7 @@ func (p *Provider) BeginAuth(ctx context.Context, state string, params ...idp.Pa
 		opts = append(opts, rp.WithCodeChallenge(oidc.NewSHACodeChallenge(codeVerifier)))
 	}
 
-	url := rp.AuthURL(state, p.RelyingParty, opts...)
+	url := rp.AuthURL(state, p.RelyingParty, opts...).String()
 	return &Session{AuthURL: url, Provider: p, CodeVerifier: codeVerifier}, nil
 }
 
