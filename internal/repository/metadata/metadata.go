@@ -38,7 +38,7 @@ func NewSetEvent(
 	}
 }
 
-func SetEventMapper(event eventstore.Event) (eventstore.Event, error) {
+func SetEventMapper(event eventstore.Event) (*SetEvent, error) {
 	e := &SetEvent{
 		BaseEvent: *eventstore.BaseEventFromRepo(event),
 	}
@@ -76,7 +76,7 @@ func NewRemovedEvent(
 	}
 }
 
-func RemovedEventMapper(event eventstore.Event) (eventstore.Event, error) {
+func RemovedEventMapper(event eventstore.Event) (*RemovedEvent, error) {
 	e := &RemovedEvent{
 		BaseEvent: *eventstore.BaseEventFromRepo(event),
 	}
@@ -110,7 +110,7 @@ func NewRemovedAllEvent(
 	}
 }
 
-func RemovedAllEventMapper(event eventstore.Event) (eventstore.Event, error) {
+func RemovedAllEventMapper(event eventstore.Event) (*RemovedAllEvent, error) {
 	return &RemovedAllEvent{
 		BaseEvent: *eventstore.BaseEventFromRepo(event),
 	}, nil

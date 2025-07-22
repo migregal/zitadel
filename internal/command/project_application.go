@@ -167,3 +167,22 @@ func (c *Commands) getApplicationWriteModel(ctx context.Context, projectID, appI
 	}
 	return appWriteModel, nil
 }
+
+func (c *Commands) checkApplicationExists(
+	ctx context.Context, projectID, appID, resourceOwner string,
+) (_ string, err error) {
+	ctx, span := tracing.NewSpan(ctx)
+	defer func() { span.EndWithError(err) }()
+
+	app, err := c.getApplicationWriteModel(ctx, projectID, appID, resourceOwner)
+	if err != nil {
+		return "", err
+	}
+
+	if app.State == domain.AppStateUnspecified {
+		return "", zerrors.ThrowPreconditionFailed(err, "COMMA-VCnwD", "Errors.Project.NotFound")
+	}
+
+
+	return app.ResourceOwner, nil
+}

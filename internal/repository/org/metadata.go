@@ -35,7 +35,7 @@ func MetadataSetEventMapper(event eventstore.Event) (eventstore.Event, error) {
 		return nil, err
 	}
 
-	return &MetadataSetEvent{SetEvent: *e.(*metadata.SetEvent)}, nil
+	return &MetadataSetEvent{SetEvent: *e}, nil
 }
 
 type MetadataRemovedEvent struct {
@@ -59,7 +59,7 @@ func MetadataRemovedEventMapper(event eventstore.Event) (eventstore.Event, error
 		return nil, err
 	}
 
-	return &MetadataRemovedEvent{RemovedEvent: *e.(*metadata.RemovedEvent)}, nil
+	return &MetadataRemovedEvent{RemovedEvent: *e}, nil
 }
 
 type MetadataRemovedAllEvent struct {
@@ -83,5 +83,5 @@ func MetadataRemovedAllEventMapper(event eventstore.Event) (eventstore.Event, er
 		return nil, err
 	}
 
-	return &MetadataRemovedAllEvent{RemovedAllEvent: *e.(*metadata.RemovedAllEvent)}, nil
+	return &MetadataRemovedAllEvent{RemovedAllEvent: *e}, nil
 }

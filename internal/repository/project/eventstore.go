@@ -44,4 +44,7 @@ func init() {
 	eventstore.RegisterFilterEventMapper(AggregateType, ApplicationKeyRemovedEventType, ApplicationKeyRemovedEventMapper)
 	eventstore.RegisterFilterEventMapper(AggregateType, SAMLConfigAddedType, SAMLConfigAddedEventMapper)
 	eventstore.RegisterFilterEventMapper(AggregateType, SAMLConfigChangedType, SAMLConfigChangedEventMapper)
+	eventstore.RegisterFilterEventMapper(AggregateType, ApplicationMetadataSetType, ApplicationMetadataSetEventMapper)
+	eventstore.RegisterFilterEventMapper(AggregateType, ApplicationMetadataRemovedType, ApplicationMetadataRemovedEventMapper)
+	eventstore.RegisterFilterEventMapper(AggregateType, ApplicationMetadataRemovedAllType, ApplicationMetadataRemovedAllEventMapper)
 }
