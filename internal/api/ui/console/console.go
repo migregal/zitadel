@@ -13,7 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/zitadel/logging"
 	"github.com/zitadel/oidc/v3/pkg/op"
 
@@ -110,7 +110,7 @@ func Start(config Config, externalSecure bool, issuer op.IssuerFromRequest, call
 	)
 	security := middleware.SecurityHeaders(csp(config.PostHog.URL), nil)
 
-	handler := mux.NewRouter()
+	handler := chi.NewRouter()
 	handler.Use(security, limitingAccessInterceptor.WithoutLimiting().Handle)
 
 	env := handler.NewRoute().Path(envRequestPath).Subrouter()

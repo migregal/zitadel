@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -117,8 +117,8 @@ func GetAuthorization(r *http.Request) string {
 
 func GetOrgID(r *http.Request) string {
 	// path variable takes precedence over header
-	orgID, ok := mux.Vars(r)[OrgIdInPathVariableName]
-	if ok {
+	orgID := chi.URLParam(r, OrgIdInPathVariableName)
+	if len(orgID) > 0 {
 		return orgID
 	}
 

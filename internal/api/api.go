@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"connectrpc.com/grpcreflect"
+	"github.com/go-chi/chi/v5"
 	"github.com/gorilla/mux"
 	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/zitadel/logging"
@@ -39,7 +40,7 @@ type API struct {
 	grpcServer        *grpc.Server
 	verifier          authz.APITokenVerifier
 	health            healthCheck
-	router            *mux.Router
+	router            chi.Router
 	hostHeaders       []string
 	grpcGateway       *server.Gateway
 	healthServer      *health.Server
@@ -90,7 +91,7 @@ type healthCheck interface {
 func New(
 	ctx context.Context,
 	port uint16,
-	router *mux.Router,
+	router chi.Router,
 	queries *query.Queries,
 	verifier authz.APITokenVerifier,
 	systemAuthz authz.Config,

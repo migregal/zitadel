@@ -12,7 +12,7 @@ import (
 	"strconv"
 
 	"github.com/crewjam/saml"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/muhlemmer/gu"
 	"github.com/zitadel/logging"
 
@@ -124,7 +124,7 @@ func NewHandler(
 		caches:              &Caches{federatedLogouts: federatedLogoutCache},
 	}
 
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	router.Use(instanceInterceptor)
 	router.HandleFunc(callbackPath, h.handleCallback)
 	router.HandleFunc(metadataPath, h.handleMetadata)
@@ -140,9 +140,8 @@ type Caches struct {
 }
 
 func parseSAMLRequest(r *http.Request) *externalSAMLIDPCallbackData {
-	vars := mux.Vars(r)
 	return &externalSAMLIDPCallbackData{
-		IDPID:      vars[varIDPID],
+		IDPID:      chi.URLParam(r, varIDPID),
 		Response:   r.FormValue("SAMLResponse"),
 		RelayState: r.FormValue("RelayState"),
 	}

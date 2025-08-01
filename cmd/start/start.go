@@ -16,7 +16,7 @@ import (
 	clockpkg "github.com/benbjohnson/clock"
 	"github.com/common-nighthawk/go-figure"
 	"github.com/fatih/color"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"github.com/zitadel/logging"
@@ -147,7 +147,7 @@ type Server struct {
 	AuthzRepo  authz_repo.Repository
 	Storage    static.Storage
 	Commands   *command.Commands
-	Router     *mux.Router
+	Router     chi.Router
 	TLSConfig  *tls.Config
 	Shutdown   chan<- os.Signal
 }
@@ -336,7 +336,7 @@ func startZitadel(ctx context.Context, config *Config, masterKey string, server 
 		return err
 	}
 
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	tlsConfig, err := config.TLS.Config()
 	if err != nil {
 		return err
@@ -389,7 +389,7 @@ func startZitadel(ctx context.Context, config *Config, masterKey string, server 
 func startAPIs(
 	ctx context.Context,
 	clock clockpkg.Clock,
-	router *mux.Router,
+	router chi.Router,
 	commands *command.Commands,
 	queries *query.Queries,
 	eventstore *eventstore.Eventstore,
@@ -661,7 +661,7 @@ func startAPIs(
 	return apis, nil
 }
 
-func listen(ctx context.Context, router *mux.Router, port uint16, tlsConfig *tls.Config, shutdown <-chan os.Signal) error {
+func listen(ctx context.Context, router chi.Router, port uint16, tlsConfig *tls.Config, shutdown <-chan os.Signal) error {
 	http2Server := &http2.Server{}
 	http1Server := &http.Server{Handler: h2c.NewHandler(router, http2Server), TLSConfig: tlsConfig}
 

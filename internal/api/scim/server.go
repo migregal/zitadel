@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/zitadel/logging"
 
 	"github.com/zitadel/zitadel/internal/api/authz"
@@ -41,21 +41,21 @@ func buildHandler(
 	middlewares ...zhttp_middlware.MiddlewareWithErrorFunc,
 ) http.Handler {
 
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	middleware := buildMiddleware(cfg, query, middlewares)
 
 	usersHandler := sresources.NewResourceHandlerAdapter(sresources.NewUsersHandler(command, query, userCodeAlg, cfg))
 	mapResource(router, middleware, usersHandler)
 
 	bulkHandler := sresources.NewBulkHandler(cfg.Bulk, usersHandler)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/Bulk", middleware(handleJsonResponse(bulkHandler.BulkFromHttp))).Methods(http.MethodPost)
+	router.Handle(http.MethodPost+" /"+zhttp.OrgIdInPathVariable+"/Bulk", middleware(handleJsonResponse(bulkHandler.BulkFromHttp)))
 
 	serviceProviderHandler := newServiceProviderHandler(cfg, usersHandler)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/ServiceProviderConfig", middleware(handleJsonResponse(serviceProviderHandler.GetConfig))).Methods(http.MethodGet)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/ResourceTypes", middleware(handleJsonResponse(serviceProviderHandler.ListResourceTypes))).Methods(http.MethodGet)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/ResourceTypes/{name}", middleware(handleResourceResponse(serviceProviderHandler.GetResourceType))).Methods(http.MethodGet)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/Schemas", middleware(handleJsonResponse(serviceProviderHandler.ListSchemas))).Methods(http.MethodGet)
-	router.Handle("/"+zhttp.OrgIdInPathVariable+"/Schemas/{id}", middleware(handleResourceResponse(serviceProviderHandler.GetSchema))).Methods(http.MethodGet)
+	router.Handle(http.MethodGet+" /"+zhttp.OrgIdInPathVariable+"/ServiceProviderConfig", middleware(handleJsonResponse(serviceProviderHandler.GetConfig)))
+	router.Handle(http.MethodGet+" /"+zhttp.OrgIdInPathVariable+"/ResourceTypes", middleware(handleJsonResponse(serviceProviderHandler.ListResourceTypes)))
+	router.Handle(http.MethodGet+" /"+zhttp.OrgIdInPathVariable+"/ResourceTypes/{name}", middleware(handleResourceResponse(serviceProviderHandler.GetResourceType)))
+	router.Handle(http.MethodGet+" /"+zhttp.OrgIdInPathVariable+"/Schemas", middleware(handleJsonResponse(serviceProviderHandler.ListSchemas)))
+	router.Handle(http.MethodGet+" /"+zhttp.OrgIdInPathVariable+"/Schemas/{id}", middleware(handleResourceResponse(serviceProviderHandler.GetSchema)))
 
 	return router
 }
@@ -70,7 +70,7 @@ func buildMiddleware(cfg *sconfig.Config, query *query.Queries, middlewares []zh
 	}
 }
 
-func mapResource[T sresources.ResourceHolder](router *mux.Router, mw zhttp_middlware.ErrorHandlerFunc, adapter *sresources.ResourceHandlerAdapter[T]) {
+func mapResource[T sresources.ResourceHolder](router chi.Router, mw zhttp_middlware.ErrorHandlerFunc, adapter *sresources.ResourceHandlerAdapter[T]) {
 	resourceRouter := router.PathPrefix("/" + path.Join(zhttp.OrgIdInPathVariable, string(adapter.Schema().PluralName))).Subrouter()
 
 	resourceRouter.Handle("", mw(handleResourceCreatedResponse(adapter.CreateFromHttp))).Methods(http.MethodPost)

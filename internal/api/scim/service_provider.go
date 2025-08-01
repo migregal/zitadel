@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 
 	zhttp "github.com/zitadel/zitadel/internal/api/http"
 	scim_config "github.com/zitadel/zitadel/internal/api/scim/config"
@@ -76,7 +76,7 @@ func newServiceProviderHandler(cfg *scim_config.Config, handlers ...sresources.R
 
 func (h *serviceProviderHandler) GetConfig(r *http.Request) (*serviceProviderConfig, error) {
 	// the request is unauthenticated, read the orgID from the url instead of the context
-	orgID := mux.Vars(r)[zhttp.OrgIdInPathVariableName]
+	orgID := chi.URLParam(r, zhttp.OrgIdInPathVariableName)
 	return &serviceProviderConfig{
 		Resource: &sschemas.Resource{
 			Schemas: []sschemas.ScimSchemaType{sschemas.IdServiceProviderConfig},
@@ -114,7 +114,7 @@ func (h *serviceProviderHandler) GetConfig(r *http.Request) (*serviceProviderCon
 func (h *serviceProviderHandler) ListResourceTypes(r *http.Request) (*sresources.ListResponse[*sschemas.ResourceType], error) {
 	// the request is unauthenticated, read the orgID from the url instead of the context
 	ctx := r.Context()
-	orgID := mux.Vars(r)[zhttp.OrgIdInPathVariableName]
+	orgID := chi.URLParam(r, zhttp.OrgIdInPathVariableName)
 
 	resourceTypes := make([]*sschemas.ResourceType, len(h.schemas))
 	for i, schema := range h.schemas {
@@ -127,9 +127,8 @@ func (h *serviceProviderHandler) ListResourceTypes(r *http.Request) (*sresources
 func (h *serviceProviderHandler) GetResourceType(r *http.Request) (*sschemas.ResourceType, error) {
 	// the request is unauthenticated, read the orgID from the url instead of the context
 	ctx := r.Context()
-	vars := mux.Vars(r)
-	orgID := vars[zhttp.OrgIdInPathVariableName]
-	name := sschemas.ScimResourceTypeSingular(vars["name"])
+	orgID := chi.URLParam(r, zhttp.OrgIdInPathVariableName)
+	name := sschemas.ScimResourceTypeSingular(chi.URLParam(r, "name"))
 
 	schema, ok := h.schemasByResourceName[name]
 	if !ok {
@@ -142,7 +141,7 @@ func (h *serviceProviderHandler) GetResourceType(r *http.Request) (*sschemas.Res
 func (h *serviceProviderHandler) ListSchemas(r *http.Request) (*sresources.ListResponse[*sschemas.ResourceSchema], error) {
 	// the request is unauthenticated, read the orgID from the url instead of the context
 	ctx := r.Context()
-	orgID := mux.Vars(r)[zhttp.OrgIdInPathVariableName]
+	orgID := chi.URLParam(r, zhttp.OrgIdInPathVariableName)
 
 	schemas := make([]*sschemas.ResourceSchema, len(h.schemas))
 	for i, schema := range h.schemas {
@@ -155,9 +154,8 @@ func (h *serviceProviderHandler) ListSchemas(r *http.Request) (*sresources.ListR
 func (h *serviceProviderHandler) GetSchema(r *http.Request) (*sschemas.ResourceSchema, error) {
 	// the request is unauthenticated, read the orgID from the url instead of the context
 	ctx := r.Context()
-	vars := mux.Vars(r)
-	orgID := vars[zhttp.OrgIdInPathVariableName]
-	id := sschemas.ScimSchemaType(vars["id"])
+	orgID := chi.URLParam(r, zhttp.OrgIdInPathVariableName)
+	id := sschemas.ScimSchemaType(chi.URLParam(r, "id"))
 
 	schema, ok := h.schemasByID[id]
 	if !ok {

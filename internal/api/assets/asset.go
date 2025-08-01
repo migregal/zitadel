@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/zitadel/logging"
 	"golang.org/x/text/language"
 
@@ -107,7 +107,7 @@ func NewHandler(commands *command.Commands, verifier authz.APITokenVerifier, sys
 	}
 
 	verifier.RegisterServer("Assets-API", "assets", AssetsService_AuthMethods)
-	router := mux.NewRouter()
+	router := chi.NewRouter()
 	csp := http_mw.SecurityHeaders(&http_mw.DefaultSCP, nil)
 	router.Use(callDurationInterceptor, instanceInterceptor, assetCacheInterceptor, accessInterceptor, csp)
 	RegisterRoutes(router, h)
@@ -202,7 +202,7 @@ func DownloadHandleFunc(s AssetsService, downloader Downloader) func(http.Respon
 			return
 		}
 		ctx := r.Context()
-		ownerPath := mux.Vars(r)["owner"]
+		ownerPath := chi.URLParam(r, "owner")
 		resourceOwner := downloader.ResourceOwner(ctx, ownerPath)
 		path := ""
 		if ownerPath != "" {

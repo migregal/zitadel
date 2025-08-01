@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/gorilla/csrf"
-	"github.com/gorilla/mux"
 
 	"github.com/zitadel/zitadel/internal/api/authz"
 	http_utils "github.com/zitadel/zitadel/internal/api/http"
@@ -70,7 +69,7 @@ func CreateLogin(
 	consolePath string,
 	oidcAuthCallbackURL, samlAuthCallbackURL func(context.Context, string) string,
 	externalSecure bool,
-	userAgentCookie, issuerInterceptor, oidcInstanceHandler, samlInstanceHandler, assetCache, accessHandler mux.MiddlewareFunc,
+	userAgentCookie, issuerInterceptor, oidcInstanceHandler, samlInstanceHandler, assetCache, accessHandler func(http.Handler) http.Handler,
 	userCodeAlg, idpConfigAlg crypto.EncryptionAlgorithm,
 	csrfCookieKey []byte,
 	cacheConnectors connector.Connectors,
@@ -153,7 +152,7 @@ func createCSRFInterceptor(cookieName string, csrfCookieKey []byte, externalSecu
 	}
 }
 
-func createCacheInterceptor(maxAge, sharedMaxAge time.Duration, assetCache mux.MiddlewareFunc) func(http.Handler) http.Handler {
+func createCacheInterceptor(maxAge, sharedMaxAge time.Duration, assetCache func(http.Handler) http.Handler) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			if strings.HasPrefix(r.URL.Path, EndpointDynamicResources) {

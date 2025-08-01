@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/muhlemmer/gu"
 	"github.com/zitadel/logging"
 
@@ -157,7 +157,7 @@ func (l *Login) handleDeviceAuthAction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	action := mux.Vars(r)["action"]
+	action := chi.URLParam(r, "action")
 	switch action {
 	case deviceAuthAllowed:
 		_, err = l.command.ApproveDeviceAuth(r.Context(), authDev.DeviceCode, authReq.UserID, authReq.UserOrgID, authReq.UserAuthMethodTypes(), authReq.AuthTime, authReq.PreferredLanguage, authReq.ToUserAgent(), authReq.SessionID)

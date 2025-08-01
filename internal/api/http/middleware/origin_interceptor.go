@@ -4,13 +4,12 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/gorilla/mux"
 	"github.com/muhlemmer/httpforwarded"
 
 	http_util "github.com/zitadel/zitadel/internal/api/http"
 )
 
-func WithOrigin(enforceHttps bool, http1Header, http2Header string, instanceHostHeaders, publicDomainHeaders []string) mux.MiddlewareFunc {
+func WithOrigin(enforceHttps bool, http1Header, http2Header string, instanceHostHeaders, publicDomainHeaders []string) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			origin := composeDomainContext(

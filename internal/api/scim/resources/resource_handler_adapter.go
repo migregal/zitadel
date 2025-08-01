@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"slices"
 
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"github.com/zitadel/logging"
 
 	"github.com/zitadel/zitadel/internal/api/scim/resources/patch"
@@ -55,7 +55,7 @@ func (adapter *ResourceHandlerAdapter[T]) Create(ctx context.Context, data io.Re
 }
 
 func (adapter *ResourceHandlerAdapter[T]) ReplaceFromHttp(r *http.Request) (ResourceHolder, error) {
-	return adapter.Replace(r.Context(), mux.Vars(r)["id"], r.Body)
+	return adapter.Replace(r.Context(), chi.URLParam(r, "id"), r.Body)
 }
 
 func (adapter *ResourceHandlerAdapter[T]) Replace(ctx context.Context, resourceID string, data io.ReadCloser) (ResourceHolder, error) {
@@ -68,7 +68,7 @@ func (adapter *ResourceHandlerAdapter[T]) Replace(ctx context.Context, resourceI
 }
 
 func (adapter *ResourceHandlerAdapter[T]) UpdateFromHttp(r *http.Request) error {
-	return adapter.Update(r.Context(), mux.Vars(r)["id"], r.Body)
+	return adapter.Update(r.Context(), chi.URLParam(r, "id"), r.Body)
 }
 
 func (adapter *ResourceHandlerAdapter[T]) Update(ctx context.Context, resourceID string, data io.ReadCloser) error {
@@ -89,7 +89,7 @@ func (adapter *ResourceHandlerAdapter[T]) Update(ctx context.Context, resourceID
 }
 
 func (adapter *ResourceHandlerAdapter[T]) DeleteFromHttp(r *http.Request) error {
-	return adapter.Delete(r.Context(), mux.Vars(r)["id"])
+	return adapter.Delete(r.Context(), chi.URLParam(r, "id"))
 }
 
 func (adapter *ResourceHandlerAdapter[T]) Delete(ctx context.Context, resourceID string) error {
@@ -106,8 +106,7 @@ func (adapter *ResourceHandlerAdapter[T]) ListFromHttp(r *http.Request) (*ListRe
 }
 
 func (adapter *ResourceHandlerAdapter[T]) GetFromHttp(r *http.Request) (T, error) {
-	id := mux.Vars(r)["id"]
-	return adapter.handler.Get(r.Context(), id)
+	return adapter.handler.Get(r.Context(), chi.URLParam(r, "id"))
 }
 
 func (adapter *ResourceHandlerAdapter[T]) readEntity(data io.ReadCloser) (T, error) {
